@@ -110,7 +110,7 @@ class IndexService:
                     heading_path=section.heading_path,
                     url=section.url or doc.url,
                     text=section.text,
-                    token_count=sum(c.token_count for c in children),
+                    token_count=self.chunker.count_tokens(section.text),
                     ordinal=ordinal,
                     children=children,
                 )

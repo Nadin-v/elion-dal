@@ -51,6 +51,10 @@ class Chunker:
             return self._length_fn(text)
         return len(_tokenizer(self._model_name).encode(text, add_special_tokens=False))
 
+    def count_tokens(self, text: str) -> int:
+        """Длина текста в токенах (без двойного счёта overlap)."""
+        return self._count(text)
+
     def split(self, text: str) -> list[Chunk]:
         from langchain_text_splitters import RecursiveCharacterTextSplitter
 

@@ -123,6 +123,9 @@ class FakeChunker:
         parts = [p for p in text.split("|") if p]
         return [Chunk(index=i, text=p, token_count=len(p)) for i, p in enumerate(parts)]
 
+    def count_tokens(self, text):
+        return len(text)
+
 
 def make_service(reranker=None, recency_weight=0.0):
     return IndexService(
