@@ -26,11 +26,15 @@ class FastEmbedProvider(EmbeddingProvider):
         dense_model: str = "intfloat/multilingual-e5-large",
         dim: int = 1024,
         sparse_model: str = "Qdrant/bm25",
+        quantize: bool = True,
     ) -> None:
         from fastembed import SparseTextEmbedding, TextEmbedding
 
         self._dense = TextEmbedding(model_name=dense_model)
         self._sparse = SparseTextEmbedding(model_name=sparse_model)
+        # У fastembed нет рантайм-флага int8: квантизация задаётся выбором ONNX-модели
+        # (напр. варианты с суффиксом "-Q"). Параметр принимаем для единообразия.
+        self.quantized = quantize and dense_model.lower().endswith(("-q", "-int8"))
         # Размерность берём по факту из модели, а не из конфига (снимает footgun
         # с рассинхроном EMBEDDING_DIM и реальной моделью).
         probe = next(iter(self._dense.embed(["x"])))

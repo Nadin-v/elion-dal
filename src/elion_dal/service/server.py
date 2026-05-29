@@ -60,6 +60,9 @@ def serve() -> None:
     )
     logger.info("Загрузка эмбеддинг-модели и инициализация хранилищ...")
     index = build_index_service(settings, ensure=False)  # модель грузим один раз
+    logger.info(
+        "Модель загружена: dim=%d quantized=%s", index.provider.dim, index.provider.quantized
+    )
     _wait_for_backends(index, settings)
 
     mb = settings.grpc_max_message_mb * 1024 * 1024

@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     # Пусто => дефолтная модель бэкенда (fastembed: multilingual-e5-large; flag: BAAI/bge-m3).
     embedding_model: str = ""
     embedding_dim: int = 1024
+    # int8-квантизация эмбеддинг-модели. ВНИМАНИЕ: для flag/BGE-M3 это torch dynamic
+    # int8, и по замерам RSS он НЕ снижается (а ~удваивается из-за fp32-копии на пике) —
+    # см. ADR-004. Поэтому default OFF. Реальное снижение RAM даёт int8 ONNX-экспорт.
+    embedding_quantize: bool = False
 
     # Чанкинг
     chunk_tokens: int = 400

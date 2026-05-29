@@ -12,14 +12,14 @@ def build_provider(settings: Settings) -> EmbeddingProvider:
     if backend == "fastembed":
         from .fastembed_provider import FastEmbedProvider
 
-        kwargs: dict = {"dim": settings.embedding_dim}
+        kwargs: dict = {"dim": settings.embedding_dim, "quantize": settings.embedding_quantize}
         if model:
             kwargs["dense_model"] = model
         return FastEmbedProvider(**kwargs)
     if backend == "flag":
         from .flag_provider import FlagProvider
 
-        kwargs = {"dim": settings.embedding_dim}
+        kwargs = {"dim": settings.embedding_dim, "quantize": settings.embedding_quantize}
         if model:
             kwargs["model_name"] = model
         return FlagProvider(**kwargs)

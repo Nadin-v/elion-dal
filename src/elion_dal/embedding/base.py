@@ -30,6 +30,8 @@ class EmbeddingProvider(ABC):
     dim: int
     #: True, если sparse — это BM25-частоты и Qdrant должен применять IDF-модификатор.
     sparse_uses_idf: bool
+    #: True, если модель реально работает в квантизованном (int8) режиме.
+    quantized: bool = False
 
     @abstractmethod
     def embed_documents(self, texts: Sequence[str]) -> list[Embedding]:

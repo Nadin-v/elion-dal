@@ -37,3 +37,8 @@ def test_sha256_stable():
 def test_factory_unknown_backend():
     with pytest.raises(ValueError):
         build_provider(Settings(embedding_backend="nope"))
+
+
+def test_quantize_default_off():
+    # По замерам torch dynamic int8 для BGE-M3 не снижает RSS -> default OFF (ADR-004).
+    assert Settings().embedding_quantize is False
