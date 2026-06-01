@@ -11,6 +11,10 @@ dist/
 # Env / secrets
 .env
 
+# Handoff: standalone-скрипты с зашитыми токенами для команд —
+# не пушим в публичный репо. Файлы передаются коллегам напрямую.
+handoff/
+
 # Test / cache
 .pytest_cache/
 .ruff_cache/
