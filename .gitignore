@@ -33,6 +33,8 @@ qdrant_*/
 *.db
 *.sqlite
 *.sqlite3
+# Папка локального smoke-прогона (SQLite + embedded Qdrant + временные скрипты)
+.local_run/
 
 # IDE / OS
 .idea/
