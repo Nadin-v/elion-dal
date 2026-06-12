@@ -8,6 +8,7 @@
 - GET    /healthz                    — health (открыт)
 - POST   /api/v1/search               — гибридный поиск, top-k родителей
 - POST   /api/v1/documents            — upsert документа (для админки upload)
+- POST   /api/v1/sources/{source_id}/reindex — пересобрать индекс Qdrant из PG (body: {"recreate": bool})
 - DELETE /api/v1/sources/{source_id}  — удалить источник
 - DELETE /api/v1/documents/{doc_id}   — удалить документ
 - GET    /api/v1/sources              — список источников + объёмы
@@ -80,6 +81,10 @@ class ChunkPreviewIn(BaseModel):
     chunk_overlap: int | None = None
     min_tokens: int | None = None
     separator_mode: str | None = None
+
+
+class ReindexIn(BaseModel):
+    recreate: bool = False
 
 
 # ----------- auth -----------
@@ -245,6 +250,21 @@ def create_api(index: IndexService, settings: Settings) -> FastAPI:
                 for f in counts.failures
             ],
         }
+
+    # --- переиндексация (disaster recovery: пересобрать Qdrant из PG) ---
+    @app.post("/api/v1/sources/{source_id}/reindex", dependencies=[Depends(auth)])
+    def reindex_source(source_id: str, req: ReindexIn = ReindexIn()) -> dict:
+        try:
+            if req.recreate:
+                index.reindex_recreate_collection()
+            stats = index.reindex_from_pg(source_id=source_id)
+        except Exception as e:  # noqa: BLE001
+            logger.exception("reindex failed source=%s recreate=%s", source_id, req.recreate)
+            raise HTTPException(
+                status_code=503,
+                detail=f"reindex failed ({type(e).__name__})",
+            ) from e
+        return {"docs": stats.docs, "chunks": stats.chunks, "failed": stats.failed}
 
     # --- удаление ---
     @app.delete("/api/v1/sources/{source_id}", dependencies=[Depends(auth)])

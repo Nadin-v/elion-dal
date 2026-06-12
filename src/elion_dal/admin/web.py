@@ -229,7 +229,15 @@ def create_app(client, settings=None) -> FastAPI:
                 f"<tr><td>{html.escape(s.source_id)}</td><td>{html.escape(s.name)}</td>"
                 f"<td>{s.document_count}</td><td>{s.parent_count}</td><td>{s.chunk_count}</td>"
                 f"<td>{_fmt_ts(s.last_indexed_ts)}</td>"
-                f"<td><form method=post action='sources/{html.escape(s.source_id)}/delete' "
+                f"<td style='white-space:nowrap'>"
+                f"<form method=post action='sources/{html.escape(s.source_id)}/reindex' style='display:inline' "
+                f"onsubmit=\"return confirm('Переиндексировать {html.escape(s.source_id)}? Займёт несколько минут.')\">"
+                f"<button>Переиндексировать</button></form> "
+                f"<form method=post action='sources/{html.escape(s.source_id)}/reindex' style='display:inline' "
+                f"onsubmit=\"return confirm('Пересоздать индекс {html.escape(s.source_id)}? Снесёт коллекцию Qdrant и построит заново из PG.')\">"
+                f"<input type=hidden name=recreate value=1>"
+                f"<button title='Снести Qdrant-коллекцию и пересобрать из PG (при повреждении storage)'>Пересоздать</button></form> "
+                f"<form method=post action='sources/{html.escape(s.source_id)}/delete' style='display:inline' "
                 f"onsubmit=\"return confirm('Удалить источник {html.escape(s.source_id)}?')\">"
                 f"<button>Удалить</button></form></td></tr>"
             )
@@ -357,6 +365,13 @@ def create_app(client, settings=None) -> FastAPI:
     def _dashboard_url(request: Request) -> str:
         # request.url_for учитывает mount-префикс (/admin/), не ломаясь при разном размещении.
         return str(request.url_for("dashboard"))
+
+    @app.post("/sources/{source_id}/reindex")
+    def reindex_source_web(
+        source_id: str, request: Request, recreate: str = Form("0")
+    ) -> RedirectResponse:
+        client.reindex_source(source_id, recreate=recreate.lower() in ("1", "true", "yes"))
+        return RedirectResponse(_dashboard_url(request), status_code=303)
 
     @app.post("/sources/{source_id}/delete")
     def delete_source(source_id: str, request: Request) -> RedirectResponse:

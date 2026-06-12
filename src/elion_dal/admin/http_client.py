@@ -102,6 +102,16 @@ class HttpAdminClient:
             for h in r.json().get("hits", [])
         ]
 
+    # ---------- переиндексация ----------
+    def reindex_source(self, source_id: str, recreate: bool = False) -> dict:
+        r = self._client.post(
+            f"/api/v1/sources/{source_id}/reindex",
+            json={"recreate": recreate},
+            timeout=600.0,  # reindex берёт минуты (переэмбеддинг всех чанков)
+        )
+        r.raise_for_status()
+        return r.json()
+
     # ---------- удаление ----------
     def delete_source(self, source_id: str) -> tuple[int, int]:
         r = self._client.delete(f"/api/v1/sources/{source_id}")
