@@ -361,6 +361,17 @@ class IndexService:
             candidates.sort(key=lambda c: c.score, reverse=True)
         return candidates[:top_k]
 
+    def reindex_source(self, source_id: str, recreate: bool = False) -> dict:
+        """API-метод для admin-UI и HttpAdminClient: пересобрать индекс из PG.
+
+        Единый интерфейс для обоих клиентов (IndexService напрямую и HttpAdminClient
+        через REST). Возвращает dict {"docs", "chunks", "failed"}.
+        """
+        if recreate:
+            self.reindex_recreate_collection()
+        stats = self.reindex_from_pg(source_id=source_id)
+        return {"docs": stats.docs, "chunks": stats.chunks, "failed": stats.failed}
+
     def reindex_recreate_collection(self) -> None:
         """Пересоздать коллекцию Qdrant с нуля (для чистого восстановления после
         битого storage — старые повреждённые сегменты сносятся целиком)."""
