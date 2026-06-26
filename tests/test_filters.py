@@ -7,12 +7,20 @@ os.environ["QDRANT_URL"] = "./qdrant_local"
 
 from elion_dal.service.bootstrap import build_index_service
 from elion_dal.service.sync import UpsertCounts
-from elion_dal.store.pg_repo import DocInput, SectionInput
+from elion_dal.store.pg_repo import DocInput, SectionInput, PgRepo
+
+
+def ensure_db():
+    """Create database tables if they don't exist."""
+    repo = PgRepo(os.environ["PG_DSN"])
+    repo.create_all()
+    return repo
 
 
 def test_academic_year_filter():
     """Test filtering by academic year."""
     print("\n=== Test: filtering by academic_year ===")
+    ensure_db()
     index = build_index_service(ensure=False)
     doc_id = "test_filter_2026"
 
@@ -84,6 +92,7 @@ def test_academic_year_filter():
 def test_is_active_filter():
     """Test filtering by active status."""
     print("\n=== Test: filtering by is_active ===")
+    ensure_db()
     index = build_index_service(ensure=False)
     doc_id = "test_filter_inactive"
 
@@ -155,6 +164,7 @@ def test_is_active_filter():
 def test_none_filter_behavior():
     """Test that None does not apply any filter."""
     print("\n=== Test: None = no filter ===")
+    ensure_db()
     index = build_index_service(ensure=False)
     doc_id = "test_filter_none"
 
