@@ -141,7 +141,7 @@ def test_dedup_by_canonical_id():
         # Проверяем, что новые чанки созданы
         detail_v2 = index.get_document_detail(doc_id_v2)
         assert detail_v2 is not None, "Новый документ должен существовать"
-        print(f"    Новый документ создан, старый удалён")
+        print("Новый документ создан, старый удалён")
         return True
 
     except AssertionError as e:
@@ -189,7 +189,10 @@ def test_skip_on_unchanged_hash():
         counts2 = UpsertCounts()
         index.process_document(doc2, counts2)
 
-        print(f"   Вторая загрузка: doc_id='{doc_id_v2}', hash='hash1' -> skipped={counts2.skipped}")
+        print(
+            f"   Вторая загрузка: doc_id='{doc_id_v2}', hash='hash1'"
+            f" -> skipped={counts2.skipped}"
+        )
 
         # Должен быть пропущен (skip)
         assert counts2.skipped == 1, "Документ с тем же хешем должен быть пропущен"
