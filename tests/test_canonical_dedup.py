@@ -74,7 +74,6 @@ def test_canonical_doc_id_preserved():
         assert saved_doc_id == doc_id, f"Ожидался doc_id '{doc_id}', получен '{saved_doc_id}'"
 
         print(f" canonical_doc_id '{canonical_id}' сохранён с doc_id '{doc_id}'")
-        return True
 
     except AssertionError as e:
         print(f" Тест провален: {e}")
@@ -142,7 +141,6 @@ def test_dedup_by_canonical_id():
         detail_v2 = index.get_document_detail(doc_id_v2)
         assert detail_v2 is not None, "Новый документ должен существовать"
         print("Новый документ создан, старый удалён")
-        return True
 
     except AssertionError as e:
         print(f" Тест провален: {e}")
@@ -203,8 +201,7 @@ def test_skip_on_unchanged_hash():
         assert saved_doc_id == doc_id_v1, f"Должен быть doc_id_v1, получен '{saved_doc_id}'"
 
         print(f"    Документ пропущен, doc_id остался '{doc_id_v1}'")
-        return True
-
+        
     except AssertionError as e:
         print(f" Тест провален: {e}")
         return False

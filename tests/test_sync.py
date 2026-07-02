@@ -45,6 +45,9 @@ class FakePg:
         # Если есть canonical_doc_id, сохраняем соответствие
         if doc.canonical_doc_id:
             self.canonical_doc_ids[doc.canonical_doc_id] = doc.doc_id
+            # Если хеш уже есть, обновляем canonical_hashes
+            if doc.content_hash:
+                self.canonical_hashes[doc.canonical_doc_id] = doc.content_hash
 
     def set_content_hash(self, doc_id, content_hash):
         self.hashes[doc_id] = content_hash
@@ -338,7 +341,7 @@ def test_search_collapses_children_to_parents():
             chunk_id=f"{pb}#1", parent_id=pb, doc_id="d1", source_id="s1", text="d", score=0.5
         ),
     ]
-    hits = svc.search("q", top_k=2, source_ids=[], min_published_ts=0)
+    hits = svc.search("q", top_k=2, source_ids=[], min_published_ts=0, return_chunk=False)
     assert [h.parent_id for h in hits] == [pb, pa]  # уникальные родители в порядке RRF
     assert hits[0].score == 0.9
     assert hits[0].matched_child == "c"  # сниппет ребёнка-победителя
