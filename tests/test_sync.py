@@ -33,7 +33,14 @@ class FakePg:
 
     def get_content_hash_by_canonical(self, canonical_doc_id):
         """Получить content_hash по canonical_doc_id."""
-        return self.canonical_hashes.get(canonical_doc_id)
+        # Сначала ищем в canonical_hashes
+        if canonical_doc_id in self.canonical_hashes:
+            return self.canonical_hashes[canonical_doc_id]
+        # Если нет, ищем через doc_id
+        doc_id = self.canonical_doc_ids.get(canonical_doc_id)
+        if doc_id:
+            return self.hashes.get(doc_id)
+        return None
 
     def get_doc_id_by_canonical(self, canonical_doc_id):
         """Получить doc_id по canonical_doc_id."""
@@ -53,8 +60,12 @@ class FakePg:
         self.hashes[doc_id] = content_hash
         # Если у документа есть canonical_doc_id, обновляем и canonical_hashes
         doc = self.docs.get(doc_id)
+        # Если есть canonical_doc_id — обновляем canonical_hashes
         if doc and doc.canonical_doc_id:
             self.canonical_hashes[doc.canonical_doc_id] = content_hash
+        # Если нет canonical_doc_id — используем doc_id как fallback
+        else:
+            self.canonical_hashes[doc_id] = content_hash
 
     def replace_parents_and_chunks(self, doc_id, parents):
         self.parents[doc_id] = list(parents)
