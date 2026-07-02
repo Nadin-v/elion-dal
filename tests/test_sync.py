@@ -18,6 +18,8 @@ from elion_dal.store.qdrant_repo import SearchHit
 class FakePg:
     def __init__(self):
         self.hashes: dict[str, str] = {}
+        self.canonical_hashes: dict[str, str] = {}
+        self.canonical_doc_ids: dict[str, str] = {}
         self.docs: dict[str, DocInput] = {}
         self.parents: dict[str, list] = {}
         self.sources: set[str] = set()
@@ -29,12 +31,27 @@ class FakePg:
     def get_content_hash(self, doc_id):
         return self.hashes.get(doc_id)
 
+    def get_content_hash_by_canonical(self, canonical_doc_id):
+        """Получить content_hash по canonical_doc_id."""
+        return self.canonical_hashes.get(canonical_doc_id)
+
+    def get_doc_id_by_canonical(self, canonical_doc_id):
+        """Получить doc_id по canonical_doc_id."""
+        return self.canonical_doc_ids.get(canonical_doc_id)
+
     def upsert_document(self, doc, raw_text):
         # Хеш здесь НЕ трогаем (как в реальном PgRepo) — только set_content_hash.
         self.docs[doc.doc_id] = doc
+        # Если есть canonical_doc_id, сохраняем соответствие
+        if doc.canonical_doc_id:
+            self.canonical_doc_ids[doc.canonical_doc_id] = doc.doc_id
 
     def set_content_hash(self, doc_id, content_hash):
         self.hashes[doc_id] = content_hash
+        # Если у документа есть canonical_doc_id, обновляем и canonical_hashes
+        doc = self.docs.get(doc_id)
+        if doc and doc.canonical_doc_id:
+            self.canonical_hashes[doc.canonical_doc_id] = content_hash
 
     def replace_parents_and_chunks(self, doc_id, parents):
         self.parents[doc_id] = list(parents)
